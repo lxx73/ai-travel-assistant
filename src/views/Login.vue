@@ -160,6 +160,13 @@ const login = async () => {
         const res = await Post('user/login', { login: loginForm.login, password: loginForm.password })
         localStorage.setItem('tripsy_remember_data', loginForm.remember ? JSON.stringify({ login: loginForm.login, remember: loginForm.remember }) : '')
         console.log('登录成功', res)
+        // 登录成功后存储token和user_id到localStorage
+        if (res.data.token) {
+          localStorage.setItem('token', res.data.token)
+        }
+        if (res.data.user_id) {
+          localStorage.setItem('user_id', res.data.user_id)
+        }
         // 登录成功后跳转到首页
         router.push('/')
       } catch (error) {

@@ -88,35 +88,6 @@
         </div>
       </div>
     </section>
-
-    <!-- 底部 -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-info">
-            <h3>AI旅游定制助手</h3>
-            <p>让每一次旅行都成为难忘的回忆</p>
-          </div>
-          <div class="footer-links">
-            <h4>快速链接</h4>
-            <ul>
-              <li><router-link to="/">首页</router-link></li>
-              <li><router-link to="/customize">AI攻略定制</router-link></li>
-              <li><router-link to="/chat">智能问答</router-link></li>
-              <li><router-link to="/user">用户中心</router-link></li>
-            </ul>
-          </div>
-          <div class="footer-contact">
-            <h4>联系我们</h4>
-            <p>邮箱：contact@aitravel.com</p>
-            <p>电话：400-123-4567</p>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>© 2026 AI旅游定制助手. 保留所有权利.</p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 

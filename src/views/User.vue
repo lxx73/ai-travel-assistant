@@ -1320,4 +1320,48 @@ const getAvatarUrl = (avatar: string) => {
   border-top: 1px solid var(--border-color);
   padding-top: 24px;
 }
+
+/* 日期选择器样式 */
+:deep(.el-date-editor) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+:deep(.el-date-editor:hover) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+:deep(.el-date-editor:focus-within) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+/* 解决日期选择器横线问题 */
+:deep(.el-date-editor .el-input__wrapper) {
+  box-shadow: none !important;
+}
+
+:deep(.el-input__inner) {
+  border: none;
+  box-shadow: none;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 15px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+:deep(.el-input__wrapper::before),
+:deep(.el-input__wrapper::after) {
+  display: none;
+}
+
+:deep(.el-input__inner:focus) {
+  outline: none;
+  box-shadow: none;
+}
 </style>

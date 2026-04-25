@@ -12,55 +12,43 @@
     <section class="customize-form-section">
       <div class="container">
         <div class="form-container">
-          <el-form
-            :model="form"
-            :rules="rules"
-            ref="formRef"
-            label-width="120px"
-            class="customize-form"
-          >
+          <el-form :model="form"
+                   :rules="rules"
+                   ref="formRef"
+                   label-width="120px"
+                   class="customize-form">
             <!-- 目的地 -->
-            <el-form-item label="目的地" prop="destination">
-              <el-input
-                v-model="form.destination"
-                placeholder="请输入目的地，例如：北京、三亚、丽江"
-                class="form-control"
-              />
+            <el-form-item label="目的地"
+                          prop="destination">
+              <el-input v-model="form.destination"
+                        placeholder="请输入目的地，例如：北京、三亚、丽江"
+                        class="form-control" />
             </el-form-item>
 
             <!-- 出行天数 -->
-            <el-form-item label="出行天数" prop="days">
-              <el-select
-                v-model="form.days"
-                placeholder="请选择出行天数"
-                class="form-control"
-              >
-                <el-option
-                  v-for="day in 10"
-                  :key="day"
-                  :label="`${day}天`"
-                  :value="day"
-                />
-              </el-select>
+            <el-form-item label="出行天数"
+                          prop="days">
+              <el-input-number :value="form.days"
+                               @input="form.days = $event"
+                               :min="1"
+                               :max="30"
+                               placeholder="请输入出行天数"
+                               class="form-control" />
             </el-form-item>
 
             <!-- 预算范围 -->
-            <el-form-item label="预算范围" prop="budget">
-              <el-select
-                v-model="form.budget"
-                placeholder="请选择预算范围"
-                class="form-control"
-              >
-                <el-option label="经济型（¥1000-2000/人）" value="经济型" />
-                <el-option label="舒适型（¥2000-4000/人）" value="舒适型" />
-                <el-option label="精品型（¥4000-6000/人）" value="精品型" />
-                <el-option label="豪华型（¥6000+/人）" value="豪华型" />
-              </el-select>
+            <el-form-item label="预算范围"
+                          prop="budget">
+              <el-input v-model="form.budgetRange"
+                        placeholder="请输入预算范围，例如：经济型、¥2000-3000/人"
+                        class="form-control" />
             </el-form-item>
 
             <!-- 出行类型 -->
-            <el-form-item label="出行类型" prop="travelType">
-              <el-radio-group v-model="form.travelType" class="radio-group">
+            <el-form-item label="出行类型"
+                          prop="travelType">
+              <el-radio-group v-model="form.travelType"
+                              class="radio-group">
                 <el-radio-button label="自由行" />
                 <el-radio-button label="跟团游" />
                 <el-radio-button label="半自由行" />
@@ -68,51 +56,41 @@
             </el-form-item>
 
             <!-- 出行人数 -->
-            <el-form-item label="出行人数" prop="people">
-              <el-select
-                v-model="form.people"
-                placeholder="请选择出行人数"
-                class="form-control"
-              >
-                <el-option
-                  v-for="num in 10"
-                  :key="num"
-                  :label="`${num}人`"
-                  :value="num"
-                />
-              </el-select>
+            <el-form-item label="出行人数"
+                          prop="people">
+              <el-input-number :value="form.people"
+                               @input="form.people = $event"
+                               :min="1"
+                               :max="50"
+                               placeholder="请输入出行人数"
+                               class="form-control" />
             </el-form-item>
 
             <!-- 出发日期 -->
-            <el-form-item label="出发日期" prop="startDate">
-              <el-date-picker
-                v-model="form.startDate"
-                type="date"
-                placeholder="请选择出发日期"
-                class="form-control"
-                :disabled-date="disabledDate"
-              />
+            <el-form-item label="出发日期"
+                          prop="startDate">
+              <el-date-picker v-model="form.startDate"
+                              type="date"
+                              placeholder="请选择出发日期"
+                              class="form-control"
+                              :disabled-date="disabledDate" />
             </el-form-item>
 
             <!-- 特殊需求 -->
             <el-form-item label="特殊需求">
-              <el-input
-                v-model="form.specialNeeds"
-                type="textarea"
-                placeholder="请输入特殊需求，例如：偏好美食、购物、景点打卡等"
-                rows="4"
-                class="form-control"
-              />
+              <el-input v-model="form.specialNeeds"
+                        type="textarea"
+                        placeholder="请输入特殊需求，例如：偏好美食、购物、景点打卡等"
+                        rows="4"
+                        class="form-control" />
             </el-form-item>
 
             <!-- 提交按钮 -->
             <el-form-item>
-              <button
-                type="button"
-                class="btn btn-primary btn-lg submit-btn"
-                @click="submitForm"
-                :loading="loading"
-              >
+              <button type="button"
+                      class="btn btn-primary btn-lg submit-btn"
+                      @click="submitForm"
+                      :loading="loading">
                 {{ loading ? '生成中...' : '生成攻略' }}
               </button>
             </el-form-item>
@@ -128,41 +106,13 @@
               <li>• 生成攻略可能需要1-2分钟时间，请耐心等待</li>
             </ul>
             <div class="tips-image">
-              <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=travel%20planning%20concept%2C%20AI%20assistant%2C%20modern%20design&image_size=portrait_4_3" alt="AI定制" />
+              <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=travel%20planning%20concept%2C%20AI%20assistant%2C%20modern%20design&image_size=portrait_4_3"
+                   alt="AI定制" />
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- 底部 -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-info">
-            <h3>AI旅游定制助手</h3>
-            <p>让每一次旅行都成为难忘的回忆</p>
-          </div>
-          <div class="footer-links">
-            <h4>快速链接</h4>
-            <ul>
-              <li><router-link to="/">首页</router-link></li>
-              <li><router-link to="/customize">AI攻略定制</router-link></li>
-              <li><router-link to="/chat">智能问答</router-link></li>
-              <li><router-link to="/user">用户中心</router-link></li>
-            </ul>
-          </div>
-          <div class="footer-contact">
-            <h4>联系我们</h4>
-            <p>邮箱：contact@aitravel.com</p>
-            <p>电话：400-123-4567</p>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>© 2026 AI旅游定制助手. 保留所有权利.</p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
@@ -170,6 +120,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import type { FormInstance } from 'element-plus'
+import { Post } from '@/main'
 
 defineOptions({
   name: 'Customize'
@@ -182,13 +133,13 @@ const loading = ref(false)
 
 // 表单数据
 const form = reactive({
-  destination: '',
-  days: 0,
-  budget: '',
-  travelType: '自由行',
-  people: 0,
-  startDate: '',
-  specialNeeds: ''
+  destination: '', // 目的地
+  days: 0, // 出行天数
+  budgetRange: '', // 预算范围
+  travelType: '自由行', // 出行类型
+  people: 0, // 出行人数
+  startDate: '', // 出发日期
+  specialNeeds: '' // 特殊需求
 })
 
 // 表单验证规则
@@ -199,7 +150,7 @@ const rules = {
   days: [
     { required: true, message: '请选择出行天数', trigger: 'change' }
   ],
-  budget: [
+  budgetRange: [
     { required: true, message: '请选择预算范围', trigger: 'change' }
   ],
   people: [
@@ -218,27 +169,31 @@ const disabledDate = (time: Date) => {
 // 提交表单
 const submitForm = async () => {
   if (!formRef.value) return
-  
   await formRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
       // 模拟AI生成攻略的过程
-      setTimeout(() => {
-        loading.value = false
-        // 跳转到攻略结果页
+      const requestData = {
+        destination: form.destination,
+        days: form.days,
+        budget_range: form.budgetRange,
+        travel_type: form.travelType,
+        people_count: form.people,
+        departure_date: form.startDate,
+        special_requirements: form.specialNeeds
+      }
+      const { code, data, message } = await Post('travel/generate', requestData)
+      if (code === 200) {
+        // 跳转到结果页面
         router.push({
           path: '/result',
           query: {
-            destination: form.destination,
-            days: form.days,
-            budget: form.budget,
-            travelType: form.travelType,
-            people: form.people,
-            startDate: form.startDate,
-            specialNeeds: form.specialNeeds
+            id: data.id
           }
         })
-      }, 2000)
+      } else {
+        alert(message)
+      }
     }
   })
 }
@@ -252,7 +207,7 @@ onMounted(() => {
     form.days = Number(route.query.days)
   }
   if (route.query.budget) {
-    form.budget = route.query.budget as string
+    form.budgetRange = route.query.budget as string
   }
 })
 </script>
@@ -334,28 +289,267 @@ onMounted(() => {
   grid-template-columns: 2fr 1fr;
   gap: var(--spacing-lg);
   background-color: var(--background-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-lg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: var(--spacing-xl);
 }
 
 .customize-form {
-  padding-right: var(--spacing-md);
+  padding-right: var(--spacing-lg);
   border-right: 1px solid var(--border-color);
 }
 
 .form-control {
   width: 100%;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
+.form-control:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+/* 输入数字组件样式 */
+:deep(.el-input-number) {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-input-number:hover) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+:deep(.el-input-number__decrease),
+:deep(.el-input-number__increase) {
+  background-color: #f8f9fa;
+  border: none;
+  width: 40px;
+  transition: all 0.3s ease;
+  color: #606266;
+}
+
+:deep(.el-input-number__decrease:hover),
+:deep(.el-input-number__increase:hover) {
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+:deep(.el-input-number__decrease.is-disabled),
+:deep(.el-input-number__increase.is-disabled) {
+  background-color: #f8f9fa;
+  color: #c9cdd4;
+  cursor: not-allowed;
+}
+
+:deep(.el-input-number__input) {
+  border: none;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-primary);
+  height: 36px;
+  line-height: 36px;
+}
+
+:deep(.el-input-number__input:focus) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 单选按钮样式 */
 .radio-group {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
 }
 
+:deep(.el-radio-button__inner) {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: -1px 0 0 0 var(--primary-color);
+}
+
+:deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-radius: 8px 0 0 8px;
+}
+
+:deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-radius: 0 8px 8px 0;
+}
+
+/* 日期选择器样式 */
+:deep(.el-date-editor) {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+:deep(.el-date-editor:hover) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+:deep(.el-date-editor:focus-within) {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+/* 解决日期选择器横线问题 */
+:deep(.el-date-editor .el-input__wrapper) {
+  box-shadow: none !important;
+}
+
+:deep(.el-input__inner) {
+  border: none;
+  box-shadow: none;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 15px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+:deep(.el-input__wrapper::before),
+:deep(.el-input__wrapper::after) {
+  display: none;
+}
+
+:deep(.el-input__inner:focus) {
+  outline: none;
+  box-shadow: none;
+}
+
+:deep(.el-input__prefix) {
+  left: 15px;
+  color: #909399;
+}
+
+:deep(.el-input__suffix) {
+  right: 15px;
+  color: #909399;
+}
+
+:deep(.el-input__prefix-inner) {
+  margin-right: 8px;
+}
+
+:deep(.el-input__suffix-inner) {
+  margin-left: 8px;
+}
+
+/* 统一日期组件样式 */
+:deep(.el-date-picker) {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #dcdfe6;
+}
+
+:deep(.el-date-picker__header) {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 12px;
+  border-radius: 8px 8px 0 0;
+}
+
+:deep(.el-date-picker__nav-btn) {
+  color: #606266;
+  transition: color 0.3s ease;
+}
+
+:deep(.el-date-picker__nav-btn:hover) {
+  color: var(--primary-color);
+}
+
+:deep(.el-date-picker__current-month) {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+:deep(.el-date-picker__time-header) {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e4e7ed;
+  padding: 8px 12px;
+}
+
+:deep(.el-date-picker__time-header__btn) {
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+:deep(.el-date-picker__time-header__btn:hover) {
+  color: #0e63d8;
+}
+
+/* 提交按钮样式 */
 .submit-btn {
   width: 100%;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary-color), #0e63d8);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, #0e63d8, var(--primary-color));
+  box-shadow: 0 6px 16px rgba(22, 119, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+}
+
+.submit-btn:disabled {
+  background: #c9cdd4;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* 表单标签样式 */
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+/* 表单错误提示 */
+:deep(.el-form-item__error) {
+  font-size: 12px;
+  color: #f56c6c;
+  margin-top: 4px;
+}
+
+/* 表单项间距 */
+:deep(.el-form-item) {
+  margin-bottom: var(--spacing-md);
 }
 
 /* 提示信息 */
@@ -467,16 +661,16 @@ onMounted(() => {
   .navbar-menu {
     gap: var(--spacing-sm);
   }
-  
+
   .nav-item {
     font-size: var(--font-size-sm);
     padding: var(--spacing-xs);
   }
-  
+
   .form-container {
     grid-template-columns: 1fr;
   }
-  
+
   .customize-form {
     padding-right: 0;
     border-right: none;
@@ -484,11 +678,11 @@ onMounted(() => {
     padding-bottom: var(--spacing-md);
     margin-bottom: var(--spacing-md);
   }
-  
+
   .form-tips {
     padding-left: 0;
   }
-  
+
   .radio-group {
     flex-wrap: wrap;
   }
