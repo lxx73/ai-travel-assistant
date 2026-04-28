@@ -3,7 +3,7 @@ import axios from "axios"
 // 创建axios实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // 从环境变量获取API地址
-  timeout: 10000, // 请求超时时间
+  timeout: 60000, // 请求超时时间 1分钟
   headers: {
     "Content-Type": "application/json",
   },
@@ -29,15 +29,15 @@ service.interceptors.response.use(
   (response) => {
     // 处理响应数据
     const res = response.data
-    if (res.code !== 200 && res.code !== 201) {
+    if (res?.code !== 200 && res?.code !== 201) {
       // 处理错误
-      console.error("Error:", res.message || "Request failed")
-      return Promise.reject(new Error(res.message || "Request failed"))
+      console.error("Error:", res?.message || "Request failed")
+      return Promise.reject(new Error(res?.message || "Request failed"))
     } else {
       // 登录成功时，自动提取并存储access_token和user_id
-      if (res.data && res.data.access_token) {
-        const token = res.data.access_token
-        const userId = res.data.user_id
+      if (res?.data && res?.data.access_token) {
+        const token = res?.data?.access_token || ''
+        const userId = res?.data?.user_id || '' 
         localStorage.setItem('token', token)
         localStorage.setItem('need_flush_user_page', 'true')
         if (userId) {
@@ -83,4 +83,4 @@ const request = {
 }
 
 export default service
-export { request, Get, Post, Put, Delete }
+export { request, service, Get, Post, Put, Delete }

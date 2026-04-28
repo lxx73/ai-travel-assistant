@@ -6,6 +6,7 @@ import "element-plus/dist/index.css"
 import "./styles/main.css"
 import service, { request, Get, Post, Put, Delete } from "./utils/axios"
 import * as ElementPlusIconsVue from "@element-plus/icons-vue"
+import pinia from "./store"
 
 const app = createApp(App)
 
@@ -21,6 +22,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(ElementPlus)
 app.use(router)
+app.use(pinia)
 // 将axios实例挂载到全局
 app.config.globalProperties.$axios = service
 // 将简化的请求方法挂载到全局

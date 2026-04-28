@@ -40,7 +40,8 @@
                       type="password"
                       placeholder="请输入密码"
                       class="form-control"
-                      show-password>
+                      show-password
+                      @keyup.enter="login">
               <template #password-icon="{ visible }">
                 <el-icon :size="16">
                   <Unlock v-if="visible" />

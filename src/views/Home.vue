@@ -6,7 +6,8 @@
         <div class="banner-content">
           <h1 class="banner-title">让AI为你定制完美旅行</h1>
           <p class="banner-subtitle">智能生成个性化旅游攻略，让每一次旅行都独一无二</p>
-          <router-link to="/customize" class="btn btn-primary btn-lg">立即定制</router-link>
+          <router-link to="/customize"
+                       class="btn btn-primary btn-lg">立即定制</router-link>
         </div>
       </div>
     </section>
@@ -16,25 +17,13 @@
       <div class="container">
         <h2 class="section-title">快捷攻略生成</h2>
         <div class="quick-options">
-          <div class="quick-card" @click="goToCustomize('北京', 3, '经济型')">
+          <div v-for="item in quickCustomizeOptions"
+               :key="item.id"
+               class="quick-card"
+               @click="goToCustomize(item.id)">
             <div class="quick-card-icon">🏙️</div>
-            <h3 class="quick-card-title">城市游</h3>
-            <p class="quick-card-desc">3天2晚 · 北京</p>
-          </div>
-          <div class="quick-card" @click="goToCustomize('三亚', 4, '舒适型')">
-            <div class="quick-card-icon">🏖️</div>
-            <h3 class="quick-card-title">海滩游</h3>
-            <p class="quick-card-desc">4天3晚 · 三亚</p>
-          </div>
-          <div class="quick-card" @click="goToCustomize('丽江', 5, '精品型')">
-            <div class="quick-card-icon">🏞️</div>
-            <h3 class="quick-card-title">古镇游</h3>
-            <p class="quick-card-desc">5天4晚 · 丽江</p>
-          </div>
-          <div class="quick-card" @click="goToCustomize('长白山', 3, '豪华型')">
-            <div class="quick-card-icon">❄️</div>
-            <h3 class="quick-card-title">滑雪游</h3>
-            <p class="quick-card-desc">3天2晚 · 长白山</p>
+            <h3 class="quick-card-title">{{ item.title }}</h3>
+            <p class="quick-card-desc">{{ item.days }}天{{ item.days - 1 }}晚 · {{ item.destination }}</p>
           </div>
         </div>
       </div>
@@ -45,12 +34,16 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">热门推荐</h2>
-          <router-link to="/customize" class="see-more">查看更多</router-link>
+          <router-link to="/customize"
+                       class="see-more">查看更多</router-link>
         </div>
         <div class="recommendation-list">
-          <div class="recommendation-card" v-for="item in recommendations" :key="item.id">
+          <div class="recommendation-card"
+               v-for="item in recommendations"
+               :key="item.id">
             <div class="recommendation-image">
-              <img :src="item.image" :alt="item.title" />
+              <img :src="item.image"
+                   :alt="item.title" />
             </div>
             <div class="recommendation-content">
               <h3 class="recommendation-title">{{ item.title }}</h3>
@@ -60,7 +53,8 @@
                 <span class="info-item">{{ item.budget }}</span>
                 <span class="info-item">{{ item.rating }}⭐</span>
               </div>
-              <router-link to="/result" class="btn btn-outline">查看详情</router-link>
+              <router-link to="/result"
+                           class="btn btn-outline">查看详情</router-link>
             </div>
           </div>
         </div>
@@ -100,6 +94,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 
 defineOptions({
   name: 'Home'
@@ -141,11 +136,62 @@ const recommendations = [
   }
 ]
 
+const quickCustomizeOptions = ref([
+  {
+    id: 0,
+    title: '城市游',
+    destination: '北京',
+    days: 3,
+    budgetType: '每人预算',
+    budgetAmount: 3000,
+    travelType: '自由行',
+    people: 2,
+    startDate: new Date().toISOString().split('T')[0],
+    specialNeeds: ''
+  },
+  {
+    id: 1,
+    title: '海滩游',
+    destination: '三亚',
+    days: 4,
+    budgetType: '每人预算',
+    budgetAmount: 4000,
+    travelType: '自由行',
+    people: 2,
+    startDate: new Date().toISOString().split('T')[0],
+    specialNeeds: ''
+  },
+  {
+    id: 2,
+    title: '古镇游',
+    destination: '丽江',
+    days: 5,
+    budgetType: '每人预算',
+    budgetAmount: 2500,
+    travelType: '自由行',
+    people: 2,
+    startDate: new Date().toISOString().split('T')[0],
+    specialNeeds: ''
+  },
+  {
+    id: 3,
+    title: '滑雪游',
+    destination: '长白山',
+    days: 3,
+    budgetType: '每人预算',
+    budgetAmount: 5000,
+    travelType: '自由行',
+    people: 2,
+    startDate: new Date().toISOString().split('T')[0],
+    specialNeeds: ''
+  },
+])
+
 // 快捷定制跳转
-const goToCustomize = (destination: string, days: number, budget: string) => {
+const goToCustomize = (id: number) => {
   router.push({
     path: '/customize',
-    query: { destination, days, budget }
+    query: quickCustomizeOptions.value[id],
   })
 }
 </script>
@@ -495,27 +541,27 @@ const goToCustomize = (destination: string, days: number, budget: string) => {
   .navbar-menu {
     gap: var(--spacing-sm);
   }
-  
+
   .nav-item {
     font-size: var(--font-size-sm);
     padding: var(--spacing-xs);
   }
-  
+
   .banner-title {
     font-size: var(--font-size-xxl);
   }
-  
+
   .banner-subtitle {
     font-size: var(--font-size-md);
   }
-  
+
   .quick-options,
   .recommendation-list,
   .feature-list,
   .footer-content {
     grid-template-columns: 1fr;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;

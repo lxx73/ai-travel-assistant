@@ -473,9 +473,14 @@ onMounted(() => {
 })
 
 onActivated(() => {
-  // 从缓存中激活时，检查是否需要刷新用户信息
+  // 从缓存中激活时，重新检查登录状态
+  token.value = localStorage.getItem("token")
+  user_id.value = localStorage.getItem("user_id")
+  isLogin.value = !!token.value && !!user_id.value
+  
+  // 检查是否需要刷新用户信息
   const needFlush = localStorage.getItem('need_flush_user_page') === 'true'
-  if (needFlush) {
+  if (isLogin.value) {
     getProfile()
   }
 })

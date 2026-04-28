@@ -34,17 +34,51 @@
               <span class="info-value">{{ itinerary.budget }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">出行类型</span>
-              <span class="info-value">{{ itinerary.travelType }}</span>
+              <span class="info-label">创建时间</span>
+              <span class="info-value">{{ formatDate(itinerary.createdAt) }}</span>
             </div>
-            <div class="info-item">
-              <span class="info-label">出行人数</span>
-              <span class="info-value">{{ itinerary.people }}人</span>
+          </div>
+          <!-- AI返回的行程概览 -->
+          <div v-if="itinerary.overview" class="overview-details">
+            <h3 class="section-subtitle">行程概览</h3>
+            <p class="overview-description">{{ itinerary.overview.description }}</p>
+            <p class="overview-budget">{{ itinerary.overview.budget_summary }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 预算详情 -->
+    <section v-if="itinerary.budgetDetails" class="budget-details">
+      <div class="container">
+        <h2 class="section-title">预算详情</h2>
+        <div class="budget-card">
+          <div class="budget-total">
+            <span class="budget-label">总预算</span>
+            <span class="budget-value">{{ itinerary.budgetDetails.total }}</span>
+          </div>
+          <div v-if="itinerary.budgetDetails.breakdown && itinerary.budgetDetails.breakdown.length > 0" class="budget-breakdown">
+            <h3 class="section-subtitle">费用明细</h3>
+            <div class="budget-list">
+              <div v-for="(item, index) in itinerary.budgetDetails.breakdown" :key="index" class="budget-item">
+                <span class="budget-item-name">{{ item.item }}</span>
+                <span class="budget-item-amount">{{ item.amount }}</span>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="info-label">出发日期</span>
-              <span class="info-value">{{ formatDate(itinerary.startDate) }}</span>
-            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 住宿推荐 -->
+    <section v-if="itinerary.accommodation && itinerary.accommodation.length > 0" class="accommodation">
+      <div class="container">
+        <h2 class="section-title">住宿推荐</h2>
+        <div class="accommodation-list">
+          <div v-for="(hotel, index) in itinerary.accommodation" :key="index" class="accommodation-card">
+            <h3 class="hotel-name">{{ hotel.name }}</h3>
+            <p class="hotel-description">{{ hotel.description }}</p>
+            <p class="hotel-price">{{ hotel.price_range }}</p>
           </div>
         </div>
       </div>
@@ -55,24 +89,24 @@
       <div class="container">
         <h2 class="section-title">每日行程</h2>
         <div class="daily-list">
-          <div 
-            v-for="(day, index) in itinerary.dailySchedule" 
-            :key="index"
+          <!-- 优先使用AI返回的scheduleDays数据 -->
+          <div
+            v-for="(day, index) in itinerary.scheduleDays || itinerary.dailyActivities"
+            :key="day.day_number || day.day || index"
             class="daily-card"
           >
             <div class="daily-header">
-              <h3 class="day-title">第{{ index + 1 }}天</h3>
-              <span class="day-date">{{ day.date }}</span>
+              <h3 class="day-title">{{ day.day_title || `第${day.day_number || day.day || index + 1}天` }}</h3>
             </div>
             <div class="daily-activities">
-              <div 
-                v-for="(activity, activityIndex) in day.activities" 
+              <div
+                v-for="(activity, activityIndex) in day.schedule || day.activities"
                 :key="activityIndex"
                 class="activity-item"
               >
                 <div class="activity-time">{{ activity.time }}</div>
                 <div class="activity-content">
-                  <h4 class="activity-title">{{ activity.title }}</h4>
+                  <h4 class="activity-title">{{ activity.title || activity.activity }} {{ activity.icon }}</h4>
                   <p class="activity-desc">{{ activity.description }}</p>
                   <div v-if="activity.location" class="activity-location">
                     📍 {{ activity.location }}
@@ -85,68 +119,66 @@
       </div>
     </section>
 
+    <!-- 旅行提示 -->
+    <section v-if="itinerary.tips" class="travel-tips">
+      <div class="container">
+        <h2 class="section-title">旅行提示</h2>
+        <div class="tips-card">
+          <p class="tips-content">{{ itinerary.tips }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 美食推荐 -->
+    <section v-if="itinerary.food && itinerary.food.length > 0" class="food-recommendations">
+      <div class="container">
+        <h2 class="section-title">美食推荐</h2>
+        <div class="food-list">
+          <div v-for="(item, index) in itinerary.food" :key="index" class="food-card">
+            <div class="food-icon">{{ item.icon || '🍽️' }}</div>
+            <div class="food-info">
+              <h3 class="food-name">{{ item.name }}</h3>
+              <p class="food-desc">{{ item.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 交通提示 -->
+    <section v-if="itinerary.transportation" class="transportation-tips">
+      <div class="container">
+        <h2 class="section-title">交通提示</h2>
+        <div class="transport-card">
+          <p class="transport-content">{{ itinerary.transportation }}</p>
+        </div>
+      </div>
+    </section>
+
     <!-- 推荐信息 -->
     <section class="recommendations">
       <div class="container">
         <h2 class="section-title">推荐信息</h2>
         <div class="recommendation-tabs">
           <el-tabs v-model="activeTab">
-            <el-tab-pane label="景点" name="attractions">
+            <el-tab-pane
+              v-for="(rec, index) in itinerary.recommendations"
+              :key="index"
+              :label="rec.category"
+              :name="rec.category"
+            >
               <div class="recommendation-grid">
-                <div 
-                  v-for="(attraction, index) in itinerary.recommendations.attractions" 
-                  :key="index"
+                <div
+                  v-for="(item, itemIndex) in rec.items"
+                  :key="itemIndex"
                   class="recommendation-card"
                 >
                   <div class="recommendation-image">
-                    <img :src="attraction.image" :alt="attraction.name" />
+                    <img :src="`https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(item + ', travel destination, beautiful scenery')}&image_size=landscape_4_3`" :alt="item" />
                   </div>
                   <div class="recommendation-content">
-                    <h4 class="recommendation-title">{{ attraction.name }}</h4>
-                    <p class="recommendation-desc">{{ attraction.description }}</p>
-                    <div class="recommendation-rating">
-                      ⭐ {{ attraction.rating }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </el-tab-pane>
-            <el-tab-pane label="酒店" name="hotels">
-              <div class="recommendation-grid">
-                <div 
-                  v-for="(hotel, index) in itinerary.recommendations.hotels" 
-                  :key="index"
-                  class="recommendation-card"
-                >
-                  <div class="recommendation-image">
-                    <img :src="hotel.image" :alt="hotel.name" />
-                  </div>
-                  <div class="recommendation-content">
-                    <h4 class="recommendation-title">{{ hotel.name }}</h4>
-                    <p class="recommendation-desc">{{ hotel.description }}</p>
-                    <div class="recommendation-price">
-                      ¥{{ hotel.price }}/晚
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </el-tab-pane>
-            <el-tab-pane label="餐厅" name="restaurants">
-              <div class="recommendation-grid">
-                <div 
-                  v-for="(restaurant, index) in itinerary.recommendations.restaurants" 
-                  :key="index"
-                  class="recommendation-card"
-                >
-                  <div class="recommendation-image">
-                    <img :src="restaurant.image" :alt="restaurant.name" />
-                  </div>
-                  <div class="recommendation-content">
-                    <h4 class="recommendation-title">{{ restaurant.name }}</h4>
-                    <p class="recommendation-desc">{{ restaurant.description }}</p>
-                    <div class="recommendation-price">
-                      ¥{{ restaurant.price }}/人
-                    </div>
+                    <h4 class="recommendation-title">{{ item }}</h4>
+                    <p class="recommendation-desc">{{ item }}是{{ itinerary.destination }}的著名景点，值得一游。</p>
                   </div>
                 </div>
               </div>
@@ -159,12 +191,164 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, reactive, onMounted, onActivated } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useTripStore } from '@/store/trip'
 
 const route = useRoute()
+const router = useRouter()
 const isFavorite = ref(false)
 const activeTab = ref('attractions')
+const tripStore = useTripStore()
+
+// 行程数据
+const itinerary = reactive({
+  id: '',
+  title: '',
+  destination: '',
+  days: 0,
+  nights: 0,
+  budgetType: '',
+  budgetAmount: 0,
+  budget: '',
+  planContent: '',
+  createdAt: '',
+  overview: {
+    title: '',
+    description: '',
+    budget_summary: ''
+  },
+  scheduleDays: [] as Array<{
+    day_number: number
+    day_title: string
+    schedule: Array<{
+      time: string
+      title: string
+      description: string
+      location: string
+      icon: string
+    }>
+  }>,
+  accommodation: [] as Array<{
+    name: string
+    description: string
+    price_range: string
+  }>,
+  budgetDetails: {
+    total: '',
+    breakdown: [] as Array<{
+      item: string
+      amount: string
+    }>
+  },
+  tips: '',
+  dailyActivities: [] as Array<{
+    day: number
+    activities: Array<{
+      time: string
+      activity: string
+      description: string
+    }>
+  }>,
+  recommendations: [] as Array<{
+    category: string
+    items: string[]
+  }>,
+  food: [] as Array<{
+    name: string
+    description: string
+    icon: string
+  }>,
+  transportation: ''
+})
+
+// 从Pinia获取行程数据
+const loadItineraryFromStore = () => {
+  const currentItinerary = tripStore.currentItinerary
+  console.log('从Pinia获取的行程数据:', currentItinerary);
+  
+  if (currentItinerary) {
+    // 深度复制数据，避免引用问题
+    Object.assign(itinerary, JSON.parse(JSON.stringify(currentItinerary)))
+    
+    // 确保所有必要的字段都存在
+    if (!itinerary.overview) {
+      itinerary.overview = {
+        title: itinerary.title,
+        description: '',
+        budget_summary: itinerary.budget
+      }
+    }
+    
+    if (!itinerary.scheduleDays) {
+      itinerary.scheduleDays = []
+    }
+    
+    if (!itinerary.budgetDetails) {
+      itinerary.budgetDetails = {
+        total: itinerary.budget,
+        breakdown: []
+      }
+    }
+    
+    if (!itinerary.accommodation) {
+      itinerary.accommodation = []
+    }
+    
+    if (!itinerary.tips) {
+      itinerary.tips = ''
+    }
+    
+    if (!itinerary.food) {
+      itinerary.food = []
+    }
+    
+    if (!itinerary.transportation) {
+      itinerary.transportation = ''
+    }
+    
+    // 处理AI返回的结构化数据
+    console.log('处理前的scheduleDays:', itinerary.scheduleDays);
+    
+    if (itinerary.scheduleDays && itinerary.scheduleDays.length > 0) {
+      // 转换scheduleDays为dailyActivities格式以保持兼容性
+      itinerary.dailyActivities = itinerary.scheduleDays.map((day, index) => ({
+        day: day.day_number || day.day || index + 1,
+        activities: (day.schedule || day.activities || []).map(item => ({
+          time: item.time || '',
+          activity: item.title || item.activity || '',
+          description: item.description || ''
+        }))
+      }))
+      console.log('转换后的dailyActivities:', itinerary.dailyActivities);
+    }
+    
+    // 生成推荐
+    generateRecommendations()
+  } else {
+    // 如果没有行程数据，重定向到定制页面
+    router.push('/customize')
+  }
+}
+
+// 生成推荐
+const generateRecommendations = () => {
+  const destination = itinerary.destination
+  itinerary.recommendations = [
+    {
+      category: '景点',
+      items: [`${destination}古城`, `${destination}雪山`, `${destination}湖泊`]
+    },
+    {
+      category: '美食',
+      items: [`${destination}特色小吃`, `${destination}纳西族菜`, `${destination}火锅`]
+    },
+    {
+      category: '住宿',
+      items: [`${destination}古城客栈`, `${destination}星级酒店`, `${destination}民宿`]
+    }
+  ]
+}
 
 // 格式化日期
 const formatDate = (dateString: string) => {
@@ -176,149 +360,14 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// 模拟行程数据
-const itinerary = reactive({
-  title: `${(route.query.destination as string) || '北京'}${(route.query.days as string) || 5}日${(route.query.travelType as string) || '自由'}行`,
-  destination: (route.query.destination as string) || '北京',
-  days: Number(route.query.days as string) || 5,
-  nights: (Number(route.query.days as string) || 5) - 1,
-  budget: (route.query.budget as string) || '舒适型',
-  travelType: (route.query.travelType as string) || '自由行',
-  people: Number(route.query.people as string) || 2,
-  startDate: (route.query.startDate as string) || new Date().toISOString().split('T')[0],
-  dailySchedule: [
-    {
-      date: '第一天',
-      activities: [
-        {
-          time: '09:00',
-          title: '抵达北京',
-          description: '抵达北京首都国际机场，乘坐机场大巴前往市区',
-          location: '北京首都国际机场'
-        },
-        {
-          time: '12:00',
-          title: '午餐',
-          description: '品尝北京特色午餐',
-          location: '王府井大街'
-        },
-        {
-          time: '14:00',
-          title: '故宫博物院',
-          description: '游览世界文化遗产，感受中国古代皇家建筑的魅力',
-          location: '故宫博物院'
-        },
-        {
-          time: '18:00',
-          title: '晚餐',
-          description: '品尝北京烤鸭',
-          location: '全聚德烤鸭店'
-        }
-      ]
-    },
-    {
-      date: '第二天',
-      activities: [
-        {
-          time: '08:00',
-          title: '天安门广场',
-          description: '观看升旗仪式，参观天安门广场',
-          location: '天安门广场'
-        },
-        {
-          time: '10:00',
-          title: '八达岭长城',
-          description: '游览中国标志性建筑，感受长城的雄伟',
-          location: '八达岭长城'
-        },
-        {
-          time: '16:00',
-          title: '颐和园',
-          description: '游览皇家园林，欣赏湖光山色',
-          location: '颐和园'
-        }
-      ]
-    },
-    {
-      date: '第三天',
-      activities: [
-        {
-          time: '09:00',
-          title: '圆明园',
-          description: '参观历史遗迹，了解中国近代史',
-          location: '圆明园'
-        },
-        {
-          time: '13:00',
-          title: '清华大学',
-          description: '参观中国顶尖学府，感受学术氛围',
-          location: '清华大学'
-        },
-        {
-          time: '15:00',
-          title: '北京大学',
-          description: '参观中国顶尖学府，感受学术氛围',
-          location: '北京大学'
-        },
-        {
-          time: '18:00',
-          title: '三里屯',
-          description: '游览时尚街区，体验北京现代生活',
-          location: '三里屯'
-        }
-      ]
-    }
-  ],
-  recommendations: {
-    attractions: [
-      {
-        name: '故宫博物院',
-        description: '中国明清两代的皇家宫殿，世界上现存规模最大、保存最为完整的木质结构古建筑之一',
-        rating: 4.9,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Forbidden%20City%20Beijing%2C%20Chinese%20imperial%20palace%2C%20historical%20landmark&image_size=landscape_4_3'
-      },
-      {
-        name: '八达岭长城',
-        description: '中国最具代表性的长城段落，以其宏伟的建筑和壮丽的自然风光闻名',
-        rating: 4.8,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Great%20Wall%20of%20China%20Badaling%2C%20magnificent%20landscape%2C%20historical%20architecture&image_size=landscape_4_3'
-      },
-      {
-        name: '颐和园',
-        description: '中国现存规模最大、保存最完整的皇家园林，被誉为皇家园林博物馆',
-        rating: 4.7,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Summer%20Palace%20Beijing%2C%20royal%20garden%2C%20traditional%20Chinese%20architecture&image_size=landscape_4_3'
-      }
-    ],
-    hotels: [
-      {
-        name: '北京王府井希尔顿酒店',
-        description: '位于市中心，交通便利，设施豪华',
-        price: 1200,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Hilton%20hotel%20Beijing%2C%20luxury%20accommodation%2C%20modern%20interior&image_size=landscape_4_3'
-      },
-      {
-        name: '北京国贸大酒店',
-        description: '位于CBD核心区，视野开阔，服务一流',
-        price: 1500,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=China%20World%20Hotel%20Beijing%2C%20upscale%20hotel%2C%20city%20view&image_size=landscape_4_3'
-      }
-    ],
-    restaurants: [
-      {
-        name: '全聚德烤鸭店',
-        description: '百年老字号，北京烤鸭的代表品牌',
-        price: 200,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Peking%20duck%20restaurant%2C%20traditional%20Chinese%20cuisine%2C%20delicious%20food&image_size=landscape_4_3'
-      },
-      {
-        name: '东来顺饭庄',
-        description: '传统涮羊肉老字号，口味正宗',
-        price: 150,
-        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Donglaishun%20restaurant%2C%20hot%20pot%20dining%2C%20traditional%20Chinese%20cuisine&image_size=landscape_4_3'
-      }
-    ]
-  }
+// 在组件激活时加载行程数据
+onActivated(() => {
+  loadItineraryFromStore()
+})
+
+// 在组件挂载时加载行程数据
+onMounted(() => {
+  loadItineraryFromStore()
 })
 
 // 收藏行程
@@ -392,15 +441,15 @@ const shareItinerary = () => {
 /* 行程概览 */
 .itinerary-overview {
   padding: var(--spacing-xl) 0;
-  background-color: var(--background-white);
+  background-color: var(--background-light);
 }
 
 .overview-card {
   background-color: var(--background-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-lg);
-  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
 }
 
 .overview-header {
@@ -413,7 +462,7 @@ const shareItinerary = () => {
 }
 
 .itinerary-title {
-  font-size: var(--font-size-xxl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   margin: 0;
@@ -422,7 +471,7 @@ const shareItinerary = () => {
 
 .itinerary-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   flex-wrap: wrap;
 }
 
@@ -430,6 +479,7 @@ const shareItinerary = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .info-item {
@@ -440,7 +490,9 @@ const shareItinerary = () => {
 
 .info-label {
   font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-value {
@@ -449,10 +501,168 @@ const shareItinerary = () => {
   color: var(--text-primary);
 }
 
+/* 行程概览详情 */
+.overview-details {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.section-subtitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.overview-description {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.overview-budget {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+/* 预算详情 */
+.budget-details {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-white);
+}
+
+.budget-card {
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.budget-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-lg);
+}
+
+.budget-label {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.budget-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary-color);
+}
+
+.budget-breakdown {
+  margin-top: var(--spacing-lg);
+}
+
+.budget-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.budget-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.budget-item-name {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+}
+
+.budget-item-amount {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+/* 住宿推荐 */
+.accommodation {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-light);
+}
+
+.accommodation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.accommodation-card {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.accommodation-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.hotel-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.hotel-description {
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+}
+
+.hotel-price {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+/* 旅行提示 */
+.travel-tips {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-white);
+}
+
+.tips-card {
+  background-color: var(--primary-light);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary-color);
+}
+
+.tips-content {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
 /* 每日行程 */
 .daily-itinerary {
   padding: var(--spacing-xl) 0;
-  background-color: var(--background-light);
+  background-color: var(--background-white);
 }
 
 .section-title {
@@ -470,14 +680,14 @@ const shareItinerary = () => {
 
 .daily-card {
   background-color: var(--background-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
   transition: all var(--transition-normal);
 }
 
 .daily-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .daily-header {
@@ -550,6 +760,80 @@ const shareItinerary = () => {
   color: var(--text-tertiary);
 }
 
+/* 美食推荐 */
+.food-recommendations {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-white);
+}
+
+.food-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.food-card {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.food-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.food-icon {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+}
+
+.food-info {
+  flex: 1;
+}
+
+.food-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.food-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 交通提示 */
+.transportation-tips {
+  padding: var(--spacing-xl) 0;
+  background-color: var(--background-light);
+}
+
+.transport-card {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary-color);
+}
+
+.transport-content {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
 /* 推荐信息 */
 .recommendations {
   padding: var(--spacing-xl) 0;
@@ -558,10 +842,9 @@ const shareItinerary = () => {
 
 .recommendation-tabs {
   background-color: var(--background-white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-md);
-  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
 }
 
 .recommendation-grid {
@@ -699,35 +982,35 @@ const shareItinerary = () => {
   .navbar-menu {
     gap: var(--spacing-sm);
   }
-  
+
   .nav-item {
     font-size: var(--font-size-sm);
     padding: var(--spacing-xs);
   }
-  
+
   .overview-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .itinerary-actions {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .overview-info {
     grid-template-columns: 1fr;
   }
-  
+
   .activity-item {
     flex-direction: column;
     gap: var(--spacing-xs);
   }
-  
+
   .activity-time {
     min-width: auto;
   }
-  
+
   .recommendation-grid {
     grid-template-columns: 1fr;
   }
